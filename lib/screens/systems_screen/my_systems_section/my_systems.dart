@@ -24,7 +24,7 @@ import 'my_systems_carousel.dart';
 import 'package:neostation/widgets/custom_notification.dart';
 import 'package:neostation/widgets/system_emulator_settings_dialog.dart';
 import 'package:neostation/sync/sync_manager.dart';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 import '../../game_screen/android_apps/android_apps_grid.dart';
 import 'package:neostation/widgets/header_sort_dropdown.dart';
 import 'package:neostation/widgets/systems_grid_footer.dart';
@@ -640,8 +640,8 @@ class MySystems extends StatelessWidget {
     final String? systemBackground = hasCustomBg ? customBg : null;
     final bool isBackgroundAsset = false;
 
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final isOled = themeProvider.isOled;
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    final isOled = paletteProvider.isOled;
 
     secondaryState.updateState(
       systemName: system.title ?? "NEOSTATION",
@@ -884,8 +884,8 @@ class _SystemCardGridViewState extends State<SystemCardGridView> {
     final String? themeBg = hasCustomBg ? null : _themeBackgrounds[folder];
     final String? systemBackground = hasCustomBg ? customBg : themeBg;
 
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final isOled = themeProvider.isOled;
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    final isOled = paletteProvider.isOled;
 
     _secondaryDisplayState?.updateState(
       systemName: (info.shortName ?? info.title ?? "NEOSTATION").toUpperCase(),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neostation/l10n/app_locale.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:provider/provider.dart';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 import '../../../providers/sqlite_config_provider.dart';
 import 'my_systems_section/my_systems.dart';
 import 'my_systems_section/initial_setup_widget.dart';
@@ -22,8 +22,8 @@ class SystemContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SqliteConfigProvider, ThemeProvider>(
-      builder: (context, configProvider, themeProvider, child) {
+    return Consumer2<SqliteConfigProvider, PaletteProvider>(
+      builder: (context, configProvider, paletteProvider, child) {
         // Determine the current operational state of the library.
         final isLoading = configProvider.isLoading || configProvider.isScanning;
 
@@ -58,26 +58,7 @@ class SystemContent extends StatelessWidget {
                         style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
-                      if (configProvider.isDownloadingSystems) ...[
-                        const SizedBox(height: 16),
-                        Text(
-                          '${(configProvider.downloadProgress * 100).toInt()}%',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        LinearProgressIndicator(
-                          value: configProvider.downloadProgress,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.surface,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          configProvider.scanStatus,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          textAlign: TextAlign.center,
-                        ),
-                      ] else if (configProvider.isScanning) ...[
+                      if (configProvider.isScanning) ...[
                         const SizedBox(height: 16),
                         Text(
                           AppLocale.percentageCompleted
@@ -98,14 +79,6 @@ class SystemContent extends StatelessWidget {
                           ).colorScheme.surface,
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          configProvider.scanStatus,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          textAlign: TextAlign.center,
-                        ),
-                      ] else if (configProvider.isLoading &&
-                          configProvider.scanStatus.isNotEmpty) ...[
-                        const SizedBox(height: 16),
                         Text(
                           configProvider.scanStatus,
                           style: Theme.of(context).textTheme.bodySmall,

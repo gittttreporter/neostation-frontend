@@ -3,7 +3,7 @@ import 'package:neostation/l10n/app_locale.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:neostation/services/sfx_service.dart';
 import 'package:provider/provider.dart';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 import 'package:neostation/widgets/theme_card.dart';
 import 'package:neostation/responsive.dart';
 import 'package:neostation/utils/gamepad_nav.dart';
@@ -13,7 +13,7 @@ import 'settings_title.dart';
 /// A specialized content panel for selecting application color palettes and visual themes.
 ///
 /// Implements a responsive grid layout with hardware-mapped gamepad navigation
-/// (Up/Down/Left/Right) and real-time theme application via ThemeProvider.
+/// (Up/Down/Left/Right) and real-time palette application via PaletteProvider.
 class PaletteSettingsContent extends StatefulWidget {
   final bool isContentFocused;
   final int selectedContentIndex;
@@ -45,9 +45,9 @@ class PaletteSettingsContentState extends State<PaletteSettingsContent> {
   /// Populates the key list based on the total number of available palettes.
   void _initializeKeys() {
     _itemKeys.clear();
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    // Total Items: Native System Theme + Registered Theme Variants.
-    final count = themeProvider.getThemeList().length + 1;
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    // Total Items: Native System Theme + Registered Palette Variants.
+    final count = paletteProvider.getPaletteList().length + 1;
     for (int i = 0; i < count; i++) {
       _itemKeys.add(GlobalKey());
     }
@@ -61,8 +61,8 @@ class PaletteSettingsContentState extends State<PaletteSettingsContent> {
 
   /// Resolves the total theme count.
   int getItemCount(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    return themeProvider.getThemeList().length + 1;
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    return paletteProvider.getPaletteList().length + 1;
   }
 
   /// Dynamic Grid Resolution: Column count based on display geometry.
@@ -135,17 +135,17 @@ class PaletteSettingsContentState extends State<PaletteSettingsContent> {
 
   /// Persistence Protocol: Updates the active application theme.
   void selectItem(int index) async {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
 
     if (index == 0) {
-      // Index 0: Native System/Dynamic theme resolution.
-      await themeProvider.setTheme('system');
+      // Index 0: Native System/Dynamic palette resolution.
+      await paletteProvider.setPalette('system');
     } else {
-      // Indices >0: Specific registered theme variants.
-      final themes = themeProvider.getThemeList();
-      final themeIndex = index - 1;
-      if (themeIndex >= 0 && themeIndex < themes.length) {
-        await themeProvider.setTheme(themes[themeIndex]['name']!);
+      // Indices >0: Specific registered palette variants.
+      final palettes = paletteProvider.getPaletteList();
+      final paletteIndex = index - 1;
+      if (paletteIndex >= 0 && paletteIndex < palettes.length) {
+        await paletteProvider.setPalette(palettes[paletteIndex]['name']!);
       }
     }
     if (mounted) setState(() {});
@@ -154,16 +154,16 @@ class PaletteSettingsContentState extends State<PaletteSettingsContent> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final paletteProvider = Provider.of<PaletteProvider>(context);
 
     // Contextual Palette Model construction.
     final List<Map<String, String>> allThemes = [
       {
         'name': 'system',
         'displayName': AppLocale.systemTheme.getString(context),
-        'logoPath': themeProvider.getCurrentLogoPath(),
+        'logoPath': paletteProvider.getCurrentLogoPath(),
       },
-      ...themeProvider.getThemeList(),
+      ...paletteProvider.getPaletteList(),
     ];
 
     // Synchronization of GlobalKeys with the dynamic theme list.
@@ -196,10 +196,10 @@ class PaletteSettingsContentState extends State<PaletteSettingsContent> {
             itemBuilder: (context, index) {
               final t = allThemes[index];
 
-              // State Resolution: Determines if the theme is currently active.
+              // State Resolution: Determines if the palette is currently active.
               final isSelected =
-                  themeProvider.currentThemeName == t['name'] ||
-                  (index == 0 && themeProvider.currentThemeName == 'system');
+                  paletteProvider.currentPaletteName == t['name'] ||
+                  (index == 0 && paletteProvider.currentPaletteName == 'system');
 
               // Focus Resolution: Determines if the item is currently highlighted via gamepad.
               final isFocused =

@@ -5,7 +5,7 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:neostation/l10n/app_locale.dart';
 import 'package:neostation/services/logger_service.dart';
 import 'package:neostation/sync/sync_manager.dart';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 import 'package:neostation/services/sfx_service.dart';
 import 'package:neostation/widgets/custom_notification.dart';
 import 'package:neostation/providers/retro_achievements_provider.dart';
@@ -961,8 +961,8 @@ class _SystemGamesListState extends State<SystemGamesList> {
     final bool hasCustomBg = customBg != null && customBg.isNotEmpty;
     final String? systemBackground = hasCustomBg ? customBg : null;
 
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final isOled = themeProvider.isOled;
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    final isOled = paletteProvider.isOled;
 
     await _secondaryDisplayState?.updateState(
       systemName: widget.system.realName,
@@ -1834,8 +1834,8 @@ class _SystemGamesListState extends State<SystemGamesList> {
 
   @override
   Widget build(BuildContext context) {
-    final isOled = context.select<ThemeProvider, bool>(
-      (t) => t.currentThemeName == 'oled',
+    final isOled = context.select<PaletteProvider, bool>(
+      (t) => t.currentPaletteName == 'oled',
     );
 
     return PopScope(

@@ -84,13 +84,13 @@ class _ThemeCardState extends State<ThemeCard> {
                               .instance
                               .platformDispatcher
                               .platformBrightness;
-                          themeData = AppPalettes.getThemeDataByName(
+                          themeData = AppPalettes.getPaletteDataByName(
                             brightness == Brightness.dark
                                 ? 'nsdark'
                                 : 'nslight',
                           );
                         } else {
-                          themeData = AppPalettes.getThemeDataByName(
+                          themeData = AppPalettes.getPaletteDataByName(
                             widget.themeName,
                           );
                         }

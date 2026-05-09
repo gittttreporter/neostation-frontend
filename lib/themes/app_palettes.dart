@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 
 // Import all individual themes
 import 'nsdark_palette.dart' as nsdark;
@@ -123,13 +123,13 @@ class AppPalettes {
 
   /// Retrieves header colors based on the current context's theme.
   static dynamic getCustomColors(BuildContext context) {
-    // Prefer detection by theme name if a ThemeProvider is available (more reliable).
+    // Prefer detection by palette name if a PaletteProvider is available (more reliable).
     try {
-      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-      final themeName = themeProvider.currentThemeName;
-      String resolvedThemeName = themeName;
+      final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+      final paletteName = paletteProvider.currentPaletteName;
+      String resolvedThemeName = paletteName;
 
-      if (themeName == 'system') {
+      if (paletteName == 'system') {
         final brightness =
             WidgetsBinding.instance.platformDispatcher.platformBrightness;
         resolvedThemeName = brightness == Brightness.dark
@@ -230,7 +230,7 @@ class AppPalettes {
     }
   }
 
-  static ThemeData getThemeDataByName(String paletteName) {
+  static ThemeData getPaletteDataByName(String paletteName) {
     switch (paletteName) {
       case 'nsdark':
         return nsdarkPalette;

@@ -3,7 +3,7 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 import 'package:neostation/responsive.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neostation/themes/app_palettes.dart';
@@ -147,8 +147,8 @@ class HeaderState extends State<Header> {
     final customColors = AppPalettes.getCustomColors(context);
     // Soft horizontal gradient derived from headerColors.background (left->right)
 
-    return Consumer2<ThemeProvider, SqliteConfigProvider>(
-      builder: (context, themeProvider, configProvider, child) {
+    return Consumer2<PaletteProvider, SqliteConfigProvider>(
+      builder: (context, paletteProvider, configProvider, child) {
         return Container(
           decoration: BoxDecoration(
             color: Colors.transparent,

@@ -20,8 +20,8 @@ class ConfigModel {
   /// Preferred display mode for the system list (e.g., 'grid', 'list').
   final String systemViewMode;
 
-  /// Identifier of the currently active UI theme.
-  final String themeName;
+  /// Identifier of the currently active UI palette.
+  final String paletteName;
 
   /// Whether to display detailed game metadata by default.
   final bool showGameInfo;
@@ -75,7 +75,7 @@ class ConfigModel {
     this.emulators = const {},
     this.gameViewMode = 'list',
     this.systemViewMode = 'grid',
-    this.themeName = 'system',
+    this.paletteName = 'system',
     this.showGameInfo = false,
     this.isFullscreen = true,
     this.bartopExitPoweroff = false,
@@ -131,7 +131,7 @@ class ConfigModel {
       emulators: emulators,
       gameViewMode: (json['gameViewMode'] ?? 'list').toString(),
       systemViewMode: (json['systemViewMode'] ?? 'grid').toString(),
-      themeName: (json['themeName'] ?? 'system').toString(),
+      paletteName: (json['paletteName'] ?? 'system').toString(),
       showGameInfo:
           (json['showGameInfo'] ?? false).toString().toLowerCase() == 'true',
       isFullscreen:
@@ -200,7 +200,7 @@ class ConfigModel {
       'emulators': emulatorsJson,
       'gameViewMode': gameViewMode,
       'systemViewMode': systemViewMode,
-      'themeName': themeName,
+      'paletteName': paletteName,
       'showGameInfo': showGameInfo,
       'isFullscreen': isFullscreen,
       'bartopExitPoweroff': bartopExitPoweroff,
@@ -227,7 +227,7 @@ class ConfigModel {
     Map<String, EmulatorModel>? emulators,
     String? gameViewMode,
     String? systemViewMode,
-    String? themeName,
+    String? paletteName,
     bool? showGameInfo,
     bool? isFullscreen,
     bool? bartopExitPoweroff,
@@ -251,7 +251,7 @@ class ConfigModel {
       emulators: emulators ?? this.emulators,
       gameViewMode: gameViewMode ?? this.gameViewMode,
       systemViewMode: systemViewMode ?? this.systemViewMode,
-      themeName: themeName ?? this.themeName,
+      paletteName: paletteName ?? this.paletteName,
       showGameInfo: showGameInfo ?? this.showGameInfo,
       isFullscreen: isFullscreen ?? this.isFullscreen,
       bartopExitPoweroff: bartopExitPoweroff ?? this.bartopExitPoweroff,

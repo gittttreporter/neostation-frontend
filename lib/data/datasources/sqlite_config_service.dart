@@ -94,7 +94,7 @@ class SqliteConfigService {
         emulators: detectedEmulators,
         gameViewMode: userConfig?['game_view_mode']?.toString() ?? 'list',
         systemViewMode: userConfig?['system_view_mode']?.toString() ?? 'grid',
-        themeName: userConfig?['theme_name']?.toString() ?? 'system',
+        paletteName: userConfig?['palette_name']?.toString() ?? 'system',
         showGameInfo:
             (int.tryParse(userConfig?['show_game_info']?.toString() ?? '0') ??
                 0) ==
@@ -142,15 +142,17 @@ class SqliteConfigService {
         activeSyncProvider:
             userConfig?['active_sync_provider']?.toString() ?? 'neosync',
         autoUpdateApp:
-            (int.tryParse(userConfig?['auto_update_app']?.toString() ?? '1') ??
-                1) ==
-            1,
+            (int.tryParse(
+                      userConfig?['auto_update_app']?.toString() ?? '1',
+                    ) ??
+                    1) ==
+                1,
         autoUpdateSystems:
             (int.tryParse(
-                  userConfig?['auto_update_systems']?.toString() ?? '1',
-                ) ??
-                1) ==
-            1,
+                      userConfig?['auto_update_systems']?.toString() ?? '1',
+                    ) ??
+                    1) ==
+                1,
       );
     } catch (e) {
       _log.e('Error applying configuration in loadConfig: $e');
@@ -167,7 +169,8 @@ class SqliteConfigService {
         lastScan: config.lastScan?.toIso8601String(),
         gameViewMode: config.gameViewMode,
         systemViewMode: config.systemViewMode,
-        themeName: config.themeName,
+        // paletteName intentionally omitted: managed exclusively by
+        // PaletteProvider via ConfigRepository.updatePaletteName().
         showGameInfo: config.showGameInfo ? 1 : 0,
         isFullscreen: config.isFullscreen ? 1 : 0,
         bartopExitPoweroff: config.bartopExitPoweroff ? 1 : 0,

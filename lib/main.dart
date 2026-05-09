@@ -2,7 +2,7 @@ import 'package:neostation/providers/menu_app_provider.dart';
 import 'package:neostation/providers/sqlite_config_provider.dart';
 import 'package:neostation/providers/sqlite_database_provider.dart';
 import 'package:neostation/providers/file_provider.dart';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 import 'package:neostation/providers/scraping_provider.dart';
 import 'package:neostation/providers/retro_achievements_provider.dart';
 import 'package:neostation/providers/neo_sync_provider.dart';
@@ -380,7 +380,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider.value(value: SyncManager.instance),
         ChangeNotifierProvider(create: (context) => BillingService()),
         ChangeNotifierProvider(create: (context) => NotificationService()),
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => PaletteProvider()),
         ChangeNotifierProvider(create: (context) => ScrapingProvider()),
         ChangeNotifierProvider(
           create: (context) => RetroAchievementsProvider()..initialize(),
@@ -390,8 +390,8 @@ class _MyAppState extends State<MyApp> {
           create: (context) => NeoAssetsProvider()..init(),
         ),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: Consumer<PaletteProvider>(
+        builder: (context, paletteProvider, child) {
           return ScreenUtilInit(
             designSize: const Size(640, 480),
             minTextAdapt: true,
@@ -432,9 +432,9 @@ class _MyAppState extends State<MyApp> {
                           child: child!,
                         );
                       },
-                      theme: themeProvider.currentTheme.copyWith(
+                      theme: paletteProvider.currentPalette.copyWith(
                         textTheme: GoogleFonts.antaTextTheme(
-                          themeProvider.currentTheme.textTheme,
+                          paletteProvider.currentPalette.textTheme,
                         ),
                         visualDensity: VisualDensity.adaptivePlatformDensity,
                         materialTapTargetSize: MaterialTapTargetSize.padded,

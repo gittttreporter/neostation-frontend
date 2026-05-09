@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neostation/services/sfx_service.dart';
 import 'package:provider/provider.dart';
-import 'package:neostation/providers/theme_provider.dart';
+import 'package:neostation/providers/palette_provider.dart';
 import 'package:neostation/widgets/theme_card.dart';
 import 'package:neostation/utils/gamepad_nav.dart';
 import 'package:neostation/responsive.dart';
@@ -10,7 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// A specialized configuration screen for selecting application-wide color palettes and visual themes.
 ///
 /// Implements a responsive grid layout with hardware-mapped gamepad navigation
-/// (Up/Down/Left/Right) and real-time theme application via ThemeProvider.
+/// (Up/Down/Left/Right) and real-time palette application via PaletteProvider.
 class ThemeSelectionScreen extends StatefulWidget {
   const ThemeSelectionScreen({super.key});
 
@@ -24,25 +24,25 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
   final ScrollController _scrollController = ScrollController();
 
   /// Constructs a unified list of available themes including the native system resolver.
-  List<Map<String, String>> _getCombinedThemes(ThemeProvider themeProvider) {
+  List<Map<String, String>> _getCombinedThemes(PaletteProvider paletteProvider) {
     return [
       {
         'name': 'system',
-        'displayName': ThemeProvider.themeDisplayNames['system'] ?? 'System',
-        'logoPath': themeProvider.getCurrentLogoPath(),
+        'displayName': PaletteProvider.paletteDisplayNames['system'] ?? 'System',
+        'logoPath': paletteProvider.getCurrentLogoPath(),
       },
-      ...themeProvider.getThemeList(),
+      ...paletteProvider.getPaletteList(),
     ];
   }
 
   @override
   void initState() {
     super.initState();
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final combinedThemes = _getCombinedThemes(themeProvider);
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    final combinedThemes = _getCombinedThemes(paletteProvider);
 
-    // Synchronize the selection index with the active theme state.
-    final currentThemeName = themeProvider.currentThemeName;
+    // Synchronize the selection index with the active palette state.
+    final currentThemeName = paletteProvider.currentPaletteName;
     final initialIndex = combinedThemes.indexWhere(
       (t) => t['name'] == currentThemeName,
     );
@@ -81,8 +81,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     })
     navFunc,
   ) {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final combined = _getCombinedThemes(themeProvider);
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    final combined = _getCombinedThemes(paletteProvider);
     final crossAxisCount = Responsive.getThemesCrossAxisCount(context);
 
     if (mounted) {
@@ -104,12 +104,12 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
 
   /// Persistent state protocol: Applies the selected theme to the application.
   Future<void> _selectThemeByIndex() async {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final combined = _getCombinedThemes(themeProvider);
+    final paletteProvider = Provider.of<PaletteProvider>(context, listen: false);
+    final combined = _getCombinedThemes(paletteProvider);
 
     if (_selectedIndex < combined.length) {
       final selected = combined[_selectedIndex];
-      await themeProvider.setTheme(selected['name']!);
+      await paletteProvider.setPalette(selected['name']!);
       if (mounted) setState(() {});
     }
   }
@@ -123,8 +123,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final combined = _getCombinedThemes(themeProvider);
+    final paletteProvider = Provider.of<PaletteProvider>(context);
+    final combined = _getCombinedThemes(paletteProvider);
     final crossAxisCount = Responsive.getThemesCrossAxisCount(context);
 
     return Scaffold(
@@ -168,11 +168,11 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
                 itemBuilder: (context, index) {
                   final t = combined[index];
 
-                  // Resolution: Determines if the theme is active in the current session.
+                  // Resolution: Determines if the palette is active in the current session.
                   final isSelected =
-                      themeProvider.currentThemeName == t['name'] ||
+                      paletteProvider.currentPaletteName == t['name'] ||
                       (t['name'] == 'system' &&
-                          themeProvider.currentThemeName == 'system');
+                          paletteProvider.currentPaletteName == 'system');
 
                   return ThemeCard(
                     themeName: t['name']!,
@@ -182,7 +182,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
                     isSelected: isSelected,
                     onTap: () async {
                       SfxService().playNavSound();
-                      await themeProvider.setTheme(t['name']!);
+                      await paletteProvider.setPalette(t['name']!);
                       if (mounted) {
                         setState(() {
                           _selectedIndex = index;
