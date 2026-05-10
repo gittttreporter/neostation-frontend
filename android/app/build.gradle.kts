@@ -108,4 +108,6 @@ flutter {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${project.property("kotlin_version")}")
+    implementation(project(":libretrodroid"))
+    implementation("androidx.appcompat:appcompat:1.7.0")
 }
