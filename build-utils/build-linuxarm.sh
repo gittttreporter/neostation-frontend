@@ -182,17 +182,36 @@ for xlib in libX11.so.* libXau.so.* libXdmcp.so.* libXext.so.* libXfixes.so.* li
   find "$LIB_DIR" -name "$xlib" -exec cp -L {} "$APPDIR/usr/lib/" \; 2>/dev/null || true
 done
 
+# Copy SoLoud audio dependencies (loaded at runtime via DynamicLibrary.open — not caught by ldd on main binary)
+echo "Copying SoLoud audio libraries..."
+for audiolib in libFLAC.so.* libFLAC++.so.* libogg.so.* libvorbis.so.* libvorbisenc.so.* libvorbisfile.so.* libopus.so.*; do
+  find "$LIB_DIR" /usr/lib -name "$audiolib" -exec cp -L {} "$APPDIR/usr/lib/" \; 2>/dev/null || true
+done
+
 # Analyze and copy additional binary dependencies
+# Run ldd on main binary AND all bundled .so plugins to catch transitive/runtime-loaded deps
 echo "Analyzing binary dependencies..."
-ldd "$APPDIR/usr/bin/neostation" | grep "=> /" | awk '{print $3}' | while read lib; do
-  if [ -f "$lib" ]; then
-    libname=$(basename "$lib")
-    if [[ ! "$libname" =~ ^(libc\.so|libm\.so|libdl\.so|libpthread\.so|librt\.so|ld-linux|libGL|libEGL|libGLX|libdrm|libnvidia|libvulkan|libgtk|libgdk|libgio|libglib|libgobject|libpango|libcairo|libgvfs|libpixbuf|librsvg|libharfbuzz|libfontconfig|libfreetype|libwayland|libmount|libblkid|libpipewire|libspa|libjack|libasound|libpulse) ]]; then
-      if [ ! -f "$APPDIR/usr/lib/$libname" ]; then
-        cp -L "$lib" "$APPDIR/usr/lib/" 2>/dev/null || true
+SYSTEM_LIB_EXCLUDE='^(libc\.so|libm\.so|libdl\.so|libpthread\.so|librt\.so|ld-linux|libGL|libEGL|libGLX|libdrm|libnvidia|libvulkan|libgtk|libgdk|libgio|libglib|libgobject|libpango|libcairo|libgvfs|libpixbuf|librsvg|libharfbuzz|libfontconfig|libfreetype|libwayland|libmount|libblkid|libpipewire|libspa|libjack|libasound|libpulse)'
+
+copy_ldd_deps() {
+  local binary="$1"
+  ldd "$binary" 2>/dev/null | grep "=> /" | awk '{print $3}' | while read lib; do
+    if [ -f "$lib" ]; then
+      libname=$(basename "$lib")
+      if [[ ! "$libname" =~ $SYSTEM_LIB_EXCLUDE ]]; then
+        if [ ! -f "$APPDIR/usr/lib/$libname" ]; then
+          cp -L "$lib" "$APPDIR/usr/lib/" 2>/dev/null || true
+        fi
       fi
     fi
-  fi
+  done
+}
+
+copy_ldd_deps "$APPDIR/usr/bin/neostation"
+
+# Also analyze all bundled .so files (plugins loaded at runtime)
+find "$APPDIR/usr/bin/lib" -name "*.so" -o -name "*.so.*" 2>/dev/null | while read sofile; do
+  copy_ldd_deps "$sofile"
 done
 
 # Create AppRun
@@ -202,6 +221,17 @@ HERE="$(dirname "$(readlink -f "${0}")")"
 
 export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:/usr/lib64:/usr/lib:${HERE}/usr/lib:${HERE}/usr/bin/lib"
 export XDG_DATA_DIRS="${HERE}/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+
+# Always use discrete GPU (PRIME render offload)
+if [ -d /proc/driver/nvidia ] || command -v nvidia-smi &>/dev/null; then
+  # NVIDIA Optimus
+  export __NV_PRIME_RENDER_OFFLOAD=1
+  export __GLX_VENDOR_LIBRARY_NAME=nvidia
+  export __VK_LAYER_NV_optimus=NVIDIA_only
+else
+  # AMD or Intel discrete (DRI_PRIME=1 selects most powerful GPU, harmless on single-GPU)
+  export DRI_PRIME=1
+fi
 
 if [ "$DEBUG_APPIMAGE" = "1" ]; then
   echo "HERE: $HERE"
