@@ -26,18 +26,9 @@ class LauncherService {
   /// Returns true if the configuration was successfully loaded and cached.
   Future<bool> loadSystemConfig(String jsonFileName) async {
     try {
-      // Prefer locally cached version downloaded from GitHub (newer than bundled).
-      String jsonString;
-      final cachedPath = await SystemsUpdateService.getCachedSystemPath(
-        jsonFileName,
+      final jsonString = await rootBundle.loadString(
+         'assets/systems/$jsonFileName',
       );
-      if (cachedPath != null) {
-        jsonString = await File(cachedPath).readAsString();
-      } else {
-        jsonString = await rootBundle.loadString(
-          'assets/systems/$jsonFileName',
-        );
-      }
       final config = jsonDecode(jsonString) as Map<String, dynamic>;
 
       final systemId = config['system']['id'].toString();
@@ -169,6 +160,9 @@ class LauncherService {
         }
       } else {
         result['package'] = platformConfig['package'];
+        if (platformConfig.containsKey('core_path')) {
+           result['core_path'] = platformConfig['core_path'];
+         }
         if (platformConfig.containsKey('activity')) {
           result['activity'] = platformConfig['activity'];
         }
@@ -346,15 +340,9 @@ class LauncherService {
 
     String result = template;
     if (game.romPath != null) {
-      final String romPath = game.romPath!;
-      result = result.replaceAll('{file.path}', romPath);
+      result = result.replaceAll('{file.path}', game.romPath!);
 
-      // SAF content:// URIs and file:// URIs pass through as-is.
-      // Only convert bare filesystem paths to file:// scheme.
-      final String uri =
-          (romPath.startsWith('content://') || romPath.startsWith('file://'))
-          ? romPath
-          : Uri.file(romPath).toString();
+      final uri = Uri.file(game.romPath!).toString();
       result = result.replaceAll('{file.uri}', uri);
 
       if (game.titleId != null) {
