@@ -931,113 +931,16 @@ class GameService {
 
         if (launchCmd.isNotEmpty) {
           if (Platform.isAndroid &&
-              launchCmd.containsKey('package') &&
-              launchCmd.containsKey('activity')) {
-            try {
-              GamepadNavigationManager.reactivate();
+              launchCmd['package'] == 'com.neogamelab.neostation.internal') {
+             const launcherPlatform = MethodChannel('com.neogamelab.neostation/launcher');
+             await launcherPlatform.invokeMethod('launchLibretroGame', {
+               'core_path': launchCmd['core_path'],
+               'rom_path': game.romPath,
+             });
+             await recordGamePlayed(game);
+             _registerGameLaunch(system, game);
+             return GameLaunchResult.success();
 
-              const platform = MethodChannel('com.neogamelab.neostation/game');
-              await platform.invokeMethod('setGamepadBlock', {'block': true});
-
-              var packageName = launchCmd['package'];
-              final activityName = launchCmd['activity'];
-              final action = launchCmd['action'];
-              final category = launchCmd['category'];
-              final data = launchCmd['data'];
-              final type = launchCmd['type'];
-
-              if (packageName.toString().startsWith('com.retroarch')) {
-                try {
-                  final defaultEmu =
-                      await EmulatorRepository.getDefaultEmulatorForSystem(
-                        system.id!,
-                      );
-                  if (defaultEmu != null &&
-                      defaultEmu.androidPackageName != null &&
-                      defaultEmu.androidPackageName!.isNotEmpty) {
-                    final userPackage = defaultEmu.androidPackageName!;
-                    if (userPackage != packageName) {
-                      packageName = userPackage;
-                    }
-                  }
-                } catch (e) {
-                  _log.e('Error overriding RetroArch package: $e');
-                }
-              }
-
-              List<Map<String, dynamic>> extrasList = [];
-
-              if (launchCmd.containsKey('extras') &&
-                  launchCmd['extras'] is List) {
-                for (final item in launchCmd['extras'] as List) {
-                  if (item is Map) {
-                    extrasList.add(Map<String, dynamic>.from(item));
-                  }
-                }
-              } else {
-                final argsStr = launchCmd['args']?.toString() ?? '';
-                if (argsStr.isNotEmpty) {
-                  final extrasMap = _parseArgsToExtras(argsStr);
-                  extrasMap.forEach((k, v) {
-                    String type = 'string';
-                    if (v is int) type = 'int';
-                    if (v is bool) type = 'bool';
-                    extrasList.add({'key': k, 'value': v, 'type': type});
-                  });
-                }
-              }
-
-              if (packageName.toString() != 'com.retroarch' &&
-                  packageName.toString().startsWith('com.retroarch')) {
-                for (var extra in extrasList) {
-                  if (extra['key'] == 'CONFIGFILE') {
-                    final String currentPath = extra['value'].toString();
-                    if (currentPath.contains('/com.retroarch/')) {
-                      final newPath = currentPath.replaceAll(
-                        '/com.retroarch/',
-                        '/$packageName/',
-                      );
-                      extra['value'] = newPath;
-                    }
-                  }
-                }
-              }
-
-              final result = await platform
-                  .invokeMethod('launchGenericIntent', {
-                    'package': packageName,
-                    'activity': activityName,
-                    'action': action,
-                    'category': category,
-                    'data': data,
-                    'type': type,
-                    'extras': extrasList,
-                    'activity_flags': launchCmd['activity_flags'] != null
-                        ? List<String>.from(launchCmd['activity_flags'] as List)
-                        : <String>[],
-                  });
-
-              if (result == true) {
-                _registerGameLaunch(system, game);
-                await recordGamePlayed(game);
-                return GameLaunchResult.success();
-              } else {
-                GamepadNavigationManager.reactivate();
-                await platform.invokeMethod('setGamepadBlock', {
-                  'block': false,
-                });
-                if (!context.mounted) return GameLaunchResult.failure('', '');
-                return GameLaunchResult.failure(
-                  AppLocale.launchFailed.getString(context),
-                  AppLocale.error.getString(context),
-                );
-              }
-            } catch (e) {
-              _log.e('JSON Launch Error: $e');
-              GamepadNavigationManager.reactivate();
-              const platform = MethodChannel('com.neogamelab.neostation/game');
-              await platform.invokeMethod('setGamepadBlock', {'block': false});
-            }
           }
 
           if ((Platform.isWindows || Platform.isLinux || Platform.isMacOS) &&
@@ -1146,6 +1049,19 @@ class GameService {
       const platform = MethodChannel('com.neogamelab.neostation/game');
       GamepadNavigationManager.reactivate();
       await platform.invokeMethod('setGamepadBlock', {'block': true});
+
+      if (coreName.startsWith('internal:')) {
+         final actualCorePath = coreName.replaceFirst('internal:', '');
+         const launcherPlatform = MethodChannel('com.neogamelab.neostation/launcher');
+         await launcherPlatform.invokeMethod('launchLibretroGame', {
+           'core_path': actualCorePath,
+           'rom_path': game.romPath,
+         });
+         await recordGamePlayed(game);
+         _registerGameLaunch(system, game);
+         return GameLaunchResult.success();
+       }
+
 
       String packageName = 'com.retroarch.aarch64';
       if (packages.isNotEmpty) {
