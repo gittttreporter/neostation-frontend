@@ -81,11 +81,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="landscape"
+            android:keepScreenOn="true"
             android:resizeableActivity="false"
             android:alwaysRetainTaskState="true"
             android:excludeFromRecents="false">
-            <!-- Flags para pantalla completa -->
             <meta-data
                 android:name="io.flutter.embedding.android.SplashScreenDrawable"
                 android:resource="@drawable/launch_background" />
@@ -98,15 +97,21 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
-            <!-- Intent filter para ser launcher/home alternativo -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+ 
+        <activity
+            android:name=".GameActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:configChanges="orientation|keyboardHidden|screenSize|keyboard|navigation"
+            android:screenOrientation="landscape"
+            android:launchMode="singleTop" />
+
         
         <!-- FileProvider para compartir archivos con otros apps (emuladores standalone) -->
         <provider
